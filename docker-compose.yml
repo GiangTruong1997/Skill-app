@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  
+  skill_app:
+    build:
+      context: ./src/fe
+      dockerfile: Dockerfile
+    container_name: skill_app
+    ports: 
+      - "8286:80"
+    working_dir: /var/www/html
+    volumes:
+      - ./src/fe:/var/www/html
+      - ./src/fe/docker/nginx_log:/var/log/nginx
+      - ./src/fe/docker/php-fpm/php-fpm.log:/var/log/php-fpm.log
+      - ./src/fe/docker/config/app.conf:/etc/nginx/conf.d/app.conf
+    links:
+      - skill_db
+
+  cms:
+    build: 
+      context: ./src/cms
+      dockerfile: Dockerfile
+    container_name: cms
+    ports:
+      - "8287:8000"
+    working_dir: /var/www/html
+    volumes:
+      - ./src/cms:/var/www/html
+      - ./src/cms/docker/nginx_log:/var/log/nginx
+      - ./src/cms/docker/php-fpm/php-fpm.log:/var/log/php-fpm.log
+      - ./src/cms/docker/config/app.conf:/etc/nginx/conf.d/app.conf
+    links:
+      - skill_db
+
+  skill_db:
+    image: mysql
+    container_name: skill_db
+    ports:
+      - "33066:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin12345678
+      MYSQL_DATABASE: skill_db
